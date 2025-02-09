@@ -41,8 +41,8 @@ class sale:
     def products(self, news_products):
         self._products = news_products
 
-    # Sell obtain
-    def obtener_sell(self):
-        sell = f"ID: {self.sale_id}\nNumbers articles: {self.num_articles}\nPayment method: {self.payment_method}\n"
-        sell += f"Total: {self.total}\nProducts: {self.products}"
-        return sell
+    # Sale obtain
+    def obtener_sale(self):
+        sale = f"ID: {self.sale_id}\nNumbers articles: {self.num_articles}\nPayment method: {self.payment_method}\n"
+        sale += f"Total: {self.total}\nProducts: {self.products}"
+        return sale
