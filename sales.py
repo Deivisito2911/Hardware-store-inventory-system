@@ -9,6 +9,6 @@ class sales:
     def delete_sale(self, sale):
         self.sales = [p for p in self.sales if p.sale_id != sale.sale_id]
 
-    def generar_report_sales(self):
+    def generate_report_sales(self):
         report = [sale.obtain_sale() for sale in self.sales]
         return report
