@@ -41,7 +41,7 @@ class product:
         self._supplier = new_supplier
     
     #Obtain details
-    def obtainDetails(self):
+    def obtain_details(self):
         details = f"ID: {self.product_id}\nName: {self.name}\nDescription: {self.description}\n"
         details += f"Price: {self._price}\nStock: {self.stock}\nSupplier: {self.supplier}"
         return details
