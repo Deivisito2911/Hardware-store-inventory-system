@@ -202,6 +202,10 @@ class InterfazInventario:
 
             producto = next((p for p in self.inventario.productos if p.nombre == producto_seleccionado), None)
             if producto:
+                if producto.cantidad_stock < cantidad:
+                    messagebox.showerror("Error", "No hay suficiente stock para realizar la venta.")
+                    return
+
                 # Crear la venta
                 venta = Venta(len(self.ventas.ventas) + 1, cantidad, medio_pago, total, [producto])
                 
@@ -210,12 +214,21 @@ class InterfazInventario:
                 
                 # Guardar la venta en la base de datos
                 self.base_datos.agregar_venta(venta)
+
+                # Actualizar el stock del producto
+                nuevo_stock = producto.cantidad_stock - cantidad
+                self.base_datos.actualizar_stock_producto(producto.producto_id, nuevo_stock)
                 
+                # Actualizar el objeto producto en la lista de inventario
+                producto.cantidad_stock = nuevo_stock
+
                 messagebox.showinfo("Éxito", "Venta agregada correctamente.")
             else:
                 messagebox.showerror("Error", "Seleccione un producto válido.")
         except ValueError:
             messagebox.showerror("Error", "Ingrese datos válidos para la venta.")
+
+
 
     def mostrar_ventas(self):
         informe = self.ventas.generar_informe_ventas()

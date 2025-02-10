@@ -40,6 +40,17 @@ class BaseDatos:
         rows = self.cursor.fetchall()  # Obtención de todas las filas resultantes
         return [Producto(*row) for row in rows] # Creación de objetos Producto a partir de las filas y retorno de una lista de productos
 
+    def actualizar_stock_producto(self, producto_id, nueva_cantidad):
+        try:
+            self.cursor.execute('''
+                UPDATE productos SET cantidad_stock=? WHERE producto_id=?
+            ''', (nueva_cantidad, producto_id))
+            self.conexion.commit()
+            print(f"Stock actualizado para producto_id {producto_id}: {nueva_cantidad}")
+        except sqlite3.Error as error:
+            messagebox.showerror("Error en base de datos", f"No se pudo actualizar el stock del producto: {error}")
+            print(f"Error al actualizar el stock: {error}")
+
     def agregar_venta(self, venta):
         try:
             # Convertir la lista de productos en una cadena de IDs separados por comas
