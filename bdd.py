@@ -11,7 +11,7 @@ class BaseDatos:
         self.crear_tabla()  # Llamada al método para crear la tabla si no existe
 
     def crear_tabla(self):
-        # Ejecución de la consulta SQL para crear la tabla de productos si no existe
+        # Crear tabla de productos si no existe
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS productos (
                 producto_id INTEGER PRIMARY KEY,
@@ -22,13 +22,47 @@ class BaseDatos:
                 proveedor TEXT
             )
         ''')
-        self.conexion.commit()  # Confirmación de los cambios en la base de datos
+
+        # Crear tabla de ventas si no existe
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS ventas (
+                venta_id INTEGER PRIMARY KEY,
+                cant_articulos INTEGER NOT NULL,
+                medio_pago TEXT NOT NULL,
+                total REAL NOT NULL,
+                productos TEXT NOT NULL  
+            )
+        ''')# Guardaremos los IDs de los productos como una cadena separada por comas
+        self.conexion.commit()
 
     def obtener_productos(self):
         self.cursor.execute("SELECT * FROM productos")
         rows = self.cursor.fetchall()  # Obtención de todas las filas resultantes
         return [Producto(*row) for row in rows] # Creación de objetos Producto a partir de las filas y retorno de una lista de productos
 
+    def agregar_venta(self, venta):
+        try:
+            # Convertir la lista de productos en una cadena de IDs separados por comas
+            productos_ids = ",".join([str(p.producto_id) for p in venta.productos])
+            
+            # Insertar la venta en la tabla de ventas
+            self.cursor.execute('''
+                INSERT INTO ventas (cant_articulos, medio_pago, total, productos)
+                VALUES (?, ?, ?, ?)
+            ''', (venta.cant_articulos, venta.medio_pago, venta.total, productos_ids))
+            self.conexion.commit()
+        except sqlite3.Error as error:
+            messagebox.showerror("Error en base de datos", f"No se pudo guardar la venta: {error}")
+
+    def obtener_ventas(self):
+        try:
+            self.cursor.execute("SELECT * FROM ventas")
+            ventas_db = self.cursor.fetchall()
+            return ventas_db
+        except sqlite3.Error as error:
+            messagebox.showerror("Error en base de datos", f"No se pudo obtener las ventas: {error}")
+            return []
+        
     def agregar_producto(self, producto):
         # Ejecución de la consulta SQL para insertar un nuevo producto en la tabla
         self.cursor.execute('''

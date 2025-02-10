@@ -55,8 +55,18 @@ class InterfazInventario:
         
 
     def cargar_productos_desde_db(self):
+        # Cargar productos
         productos_db = self.base_datos.obtener_productos()
         self.inventario.productos = productos_db
+
+        # Cargar ventas
+        ventas_db = self.base_datos.obtener_ventas()
+        for venta in ventas_db:
+            venta_id, cant_articulos, medio_pago, total, productos_ids = venta
+            productos = [self.inventario.buscar_producto(int(id)) for id in productos_ids.split(",")]
+            productos = [p for p in productos if p is not None]  # Filtrar productos no encontrados
+            venta = Venta(venta_id, cant_articulos, medio_pago, total, productos)
+            self.ventas.agregar_venta(venta)
 
     def crear_interfaz_agregar_producto(self):
         etiquetas_agregar = ["Nombre del Producto", "Descripción", "Precio", "Stock", "Proveedor"]
@@ -192,8 +202,15 @@ class InterfazInventario:
 
             producto = next((p for p in self.inventario.productos if p.nombre == producto_seleccionado), None)
             if producto:
+                # Crear la venta
                 venta = Venta(len(self.ventas.ventas) + 1, cantidad, medio_pago, total, [producto])
+                
+                # Guardar la venta en la lista de ventas
                 self.ventas.agregar_venta(venta)
+                
+                # Guardar la venta en la base de datos
+                self.base_datos.agregar_venta(venta)
+                
                 messagebox.showinfo("Éxito", "Venta agregada correctamente.")
             else:
                 messagebox.showerror("Error", "Seleccione un producto válido.")
