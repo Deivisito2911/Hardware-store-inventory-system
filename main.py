@@ -1,8 +1,8 @@
 import tkinter as tk
-from inventoryInterface import interfaceinventary
+from interfazinventario import InterfazInventario
 
 # Inicialización de la aplicación
-if __name__ == "_main_":
+if __name__ == "__main__":
     root = tk.Tk()
-    app = interfaceinventary(root)
+    app = InterfazInventario(root)
     root.mainloop()
