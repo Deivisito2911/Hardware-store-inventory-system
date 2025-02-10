@@ -113,39 +113,90 @@ class InterfazInventario:
         self.boton_mostrar_informe = tk.Button(self.root, text="Mostrar Informe", command=self.mostrar_informe, font=("Arial", 12), bg="#333", fg="white")
         self.boton_mostrar_informe.pack(pady=10)
 
+    def actualizar_lista_productos(self):
+        nombres_productos = [producto.nombre for producto in self.inventario.productos]
+        self.combo_productos["values"] = nombres_productos
+
+    def filtrar_productos(self, event):
+        texto = self.combo_productos.get()
+        if texto == "":
+            self.combo_productos["values"] = [producto.nombre for producto in self.inventario.productos]
+        else:
+            filtrado = [producto.nombre for producto in self.inventario.productos if texto.lower() in producto.nombre.lower()]
+            self.combo_productos["values"] = filtrado
+    def actualizar_precio_venta(self, event=None):
+        producto_seleccionado = self.combo_productos.get()
+        cantidad = self.entry_cantidad.get()
+
+        if producto_seleccionado and cantidad:
+            producto = next((p for p in self.inventario.productos if p.nombre == producto_seleccionado), None)
+            if producto:
+                try:
+                    cantidad = int(cantidad)
+                    total = producto.precio * cantidad
+                    self.entry_total.config(state="normal")
+                    self.entry_total.delete(0, tk.END)
+                    self.entry_total.insert(0, f"{total:.2f}")
+                    self.entry_total.config(state="readonly")
+                except ValueError:
+                    self.entry_total.config(state="normal")
+                    self.entry_total.delete(0, tk.END)
+                    self.entry_total.insert(0, "0.00")
+                    self.entry_total.config(state="readonly")
+
     def crear_interfaz_agregar_venta(self):
-        etiquetas_agregar = ["Cantidad Artículos", "Medio de Pago", "Total", "Productos (IDs separados por comas)"]
+        # Etiquetas y campos de entrada
+        etiquetas_agregar = ["Seleccionar Producto", "Cantidad", "Medio de Pago", "Total"]
         self.entries_agregar_ventas = {}
-        for i, etiqueta in enumerate(etiquetas_agregar):
-            tk.Label(self.pagina_ventas, text=etiqueta, font=("Arial", 12)).grid(row=i, column=0, padx=10, pady=5)
-            entry = tk.Entry(self.pagina_ventas, font=("Arial", 12))
-            entry.grid(row=i, column=1, padx=10, pady=5)
-            self.entries_agregar_ventas[etiqueta] = entry
+
+        # Combobox para seleccionar productos
+        tk.Label(self.pagina_ventas, text=etiquetas_agregar[0], font=("Arial", 12)).grid(row=0, column=0, padx=10, pady=5)
+        self.combo_productos = ttk.Combobox(self.pagina_ventas, font=("Arial", 12))
+        self.combo_productos.grid(row=0, column=1, padx=10, pady=5)
+        self.combo_productos.bind("<<ComboboxSelected>>", self.actualizar_precio_venta)
+        self.combo_productos.bind("<KeyRelease>", self.filtrar_productos)
+
+        # Campo para la cantidad
+        tk.Label(self.pagina_ventas, text=etiquetas_agregar[1], font=("Arial", 12)).grid(row=1, column=0, padx=10, pady=5)
+        self.entry_cantidad = tk.Entry(self.pagina_ventas, font=("Arial", 12))
+        self.entry_cantidad.grid(row=1, column=1, padx=10, pady=5)
+        self.entry_cantidad.bind("<KeyRelease>", self.actualizar_precio_venta)
+
+        # Campo para el medio de pago
+        tk.Label(self.pagina_ventas, text=etiquetas_agregar[2], font=("Arial", 12)).grid(row=2, column=0, padx=10, pady=5)
+        self.entry_medio_pago = tk.Entry(self.pagina_ventas, font=("Arial", 12))
+        self.entry_medio_pago.grid(row=2, column=1, padx=10, pady=5)
+
+        # Campo para el total (solo lectura)
+        tk.Label(self.pagina_ventas, text=etiquetas_agregar[3], font=("Arial", 12)).grid(row=3, column=0, padx=10, pady=5)
+        self.entry_total = tk.Entry(self.pagina_ventas, font=("Arial", 12), state="readonly")
+        self.entry_total.grid(row=3, column=1, padx=10, pady=5)
+
+        # Botón para agregar la venta
         self.boton_agregar = tk.Button(self.pagina_ventas, text="Agregar Venta", command=self.agregar_venta, font=("Arial", 12), bg="#4CAF50", fg="white")
-        self.boton_agregar.grid(row=len(etiquetas_agregar) + 1, column=0, columnspan=2, pady=10)
+        self.boton_agregar.grid(row=4, column=0, columnspan=2, pady=10)
+
+        # Cargar la lista de productos en el Combobox
+        self.actualizar_lista_productos()
 
     def crear_boton_mostrar_ventas(self):
         self.boton_mostrar_informe = tk.Button(self.root, text="Mostrar Ventas", command=self.mostrar_ventas, font=("Arial", 12), bg="#333", fg="white")
         self.boton_mostrar_informe.pack(pady=10)
     
-
-    
     def agregar_venta(self):
         try:
-            cant_art = int(self.entries_agregar_ventas["Cantidad Artículos"].get())
-            medio_pago = self.entries_agregar_ventas["Medio de Pago"].get()
-            total = float(self.entries_agregar_ventas["Total"].get())
-            productos_ids = self.entries_agregar_ventas["Productos (IDs separados por comas)"].get().split(',')
-            productos = [self.inventario.buscar_producto(int(id.strip())) for id in productos_ids]
-            productos = [p for p in productos if p is not None]  # Filtrar productos no encontrados
+            producto_seleccionado = self.combo_productos.get()
+            cantidad = int(self.entry_cantidad.get())
+            medio_pago = self.entry_medio_pago.get()
+            total = float(self.entry_total.get())
 
-            if not productos:
-                messagebox.showerror("Error", "No se encontraron productos válidos.")
-                return
-
-            venta = Venta(len(self.ventas.ventas) + 1, cant_art, medio_pago, total, productos)
-            self.ventas.agregar_venta(venta)
-            messagebox.showinfo("Éxito", "Venta agregada correctamente.")
+            producto = next((p for p in self.inventario.productos if p.nombre == producto_seleccionado), None)
+            if producto:
+                venta = Venta(len(self.ventas.ventas) + 1, cantidad, medio_pago, total, [producto])
+                self.ventas.agregar_venta(venta)
+                messagebox.showinfo("Éxito", "Venta agregada correctamente.")
+            else:
+                messagebox.showerror("Error", "Seleccione un producto válido.")
         except ValueError:
             messagebox.showerror("Error", "Ingrese datos válidos para la venta.")
 
