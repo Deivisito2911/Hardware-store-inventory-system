@@ -1,4 +1,3 @@
-# Clase Ventas
 class Ventas:
     def __init__(self):
         self.ventas = []

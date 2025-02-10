@@ -1,4 +1,3 @@
-# Clase Inventario
 class Inventario:
     def __init__(self):
         self.productos = []
@@ -8,7 +7,6 @@ class Inventario:
 
     def eliminar_producto(self, producto):
         self.productos = [p for p in self.productos if p.producto_id != producto.producto_id]
-
 
     def buscar_producto(self, producto_id):
         for producto in self.productos:

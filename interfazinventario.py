@@ -114,7 +114,7 @@ class InterfazInventario:
         self.boton_mostrar_informe.pack(pady=10)
 
     def crear_interfaz_agregar_venta(self):
-        etiquetas_agregar = ["Cantidad Artículos", "Medio de Pago", "Total", "Productos"]
+        etiquetas_agregar = ["Cantidad Artículos", "Medio de Pago", "Total", "Productos (IDs separados por comas)"]
         self.entries_agregar_ventas = {}
         for i, etiqueta in enumerate(etiquetas_agregar):
             tk.Label(self.pagina_ventas, text=etiqueta, font=("Arial", 12)).grid(row=i, column=0, padx=10, pady=5)
@@ -123,7 +123,7 @@ class InterfazInventario:
             self.entries_agregar_ventas[etiqueta] = entry
         self.boton_agregar = tk.Button(self.pagina_ventas, text="Agregar Venta", command=self.agregar_venta, font=("Arial", 12), bg="#4CAF50", fg="white")
         self.boton_agregar.grid(row=len(etiquetas_agregar) + 1, column=0, columnspan=2, pady=10)
-    
+
     def crear_boton_mostrar_ventas(self):
         self.boton_mostrar_informe = tk.Button(self.root, text="Mostrar Ventas", command=self.mostrar_ventas, font=("Arial", 12), bg="#333", fg="white")
         self.boton_mostrar_informe.pack(pady=10)
@@ -132,15 +132,22 @@ class InterfazInventario:
     
     def agregar_venta(self):
         try:
-            cant_art = self.entries_agregar_ventas["Cantidad Artículos"].get()
+            cant_art = int(self.entries_agregar_ventas["Cantidad Artículos"].get())
             medio_pago = self.entries_agregar_ventas["Medio de Pago"].get()
             total = float(self.entries_agregar_ventas["Total"].get())
-            prodcutos = int(self.entries_agregar_ventas["Productos"].get())
-            venta = Venta(len(self.ventas.ventas) + 1, cant_art, medio_pago, total, prodcutos)
+            productos_ids = self.entries_agregar_ventas["Productos (IDs separados por comas)"].get().split(',')
+            productos = [self.inventario.buscar_producto(int(id.strip())) for id in productos_ids]
+            productos = [p for p in productos if p is not None]  # Filtrar productos no encontrados
+
+            if not productos:
+                messagebox.showerror("Error", "No se encontraron productos válidos.")
+                return
+
+            venta = Venta(len(self.ventas.ventas) + 1, cant_art, medio_pago, total, productos)
             self.ventas.agregar_venta(venta)
-            messagebox.showinfo("Éxito", "Producto agregado correctamente.")
+            messagebox.showinfo("Éxito", "Venta agregada correctamente.")
         except ValueError:
-            messagebox.showerror("Error", "Ingrese datos válidos para el producto.")
+            messagebox.showerror("Error", "Ingrese datos válidos para la venta.")
 
     def mostrar_ventas(self):
         informe = self.ventas.generar_informe_ventas()
