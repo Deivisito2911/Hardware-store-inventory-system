@@ -39,7 +39,7 @@ class BaseDatos:
 
     def eliminar_producto(self, producto):
         self.cursor.execute('''
-             DELETE FROM productos WHERE producto_id=?               
+            DELETE FROM productos WHERE producto_id=?               
         ''', (producto.producto_id,))
         self.conexion.commit()
         
