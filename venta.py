@@ -1,12 +1,13 @@
 from producto import Producto  # Importamos la clase Producto del módulo producto.py
 
 class Venta:
-    def __init__(self, venta_id, cant_articulos, medio_pago, total, productos):
+    def __init__(self, venta_id, cant_articulos, medio_pago, total, productos, cliente_id):
         self.venta_id = venta_id
         self._cant_articulos = cant_articulos
         self._medio_pago = medio_pago
         self._total = total
         self._productos = productos
+        self._cliente_id = cliente_id
 
     # CANTIDAD ARTICULOS
     @property
@@ -44,8 +45,15 @@ class Venta:
     def productos(self, nuevos_productos):
         self._productos = nuevos_productos
 
-    # OBTENER VENTA
+    @property
+    def cliente_id(self):
+        return self._cliente_id
+
+    @cliente_id.setter
+    def cliente_id(self, nuevo_cliente_id):
+        self._cliente_id = nuevo_cliente_id
+
     def obtener_venta(self):
         venta = f"ID: {self.venta_id}\nCantidad de artículos: {self.cant_articulos}\nMedio de pago: {self.medio_pago}\n"
-        venta += f"Total: {self.total}\nProductos: {', '.join([p.nombre for p in self.productos])}"
+        venta += f"Total: {self.total}\nProductos: {', '.join([p.nombre for p in self.productos])}\nCliente ID: {self.cliente_id}"
         return venta
